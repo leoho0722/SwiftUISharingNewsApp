@@ -82,6 +82,11 @@ struct AttachmentFile: Identifiable, Codable {
     /// 檔案連結位置
     let fileURL: String
     
+    /// 檔案副檔名
+    var fileExtension: String {
+        return (fileName as NSString).pathExtension
+    }
+    
     enum CodingKeys: String, CodingKey {
         case id
         case fileName = "filename"

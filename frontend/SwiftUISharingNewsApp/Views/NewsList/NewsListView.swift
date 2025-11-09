@@ -45,7 +45,7 @@ extension NewsListView {
     /// 載入畫面
     @ViewBuilder
     private var loadingView: some View {
-        ProgressView("取得新聞資料中...")
+        LoadingView("取得新聞資料中...")
     }
     
     /// 新聞列表（依發布「日期」分組成 Section），所有邏輯由 ViewModel 提供
@@ -69,7 +69,7 @@ extension NewsListView {
     /// 錯誤畫面
     @ViewBuilder
     private var errorView: some View {
-        ContentUnavailableView {
+        ErrorView {
             Label("取得新聞資料失敗！", symbols: .exclamationmarkTriangleFill)
         } actions: {
             Button {

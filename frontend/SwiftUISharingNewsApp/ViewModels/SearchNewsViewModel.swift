@@ -1,15 +1,15 @@
 //
-//  NewsListViewModel.swift
+//  SearchNewsViewModel.swift
 //  SwiftUISharingNewsApp
 //
-//  Created by Leo Ho on 2025/11/1.
+//  Created by Leo Ho on 2025/11/4.
 //
 
 import Foundation
 
 // MARK: - Nested Types
 
-extension NewsListViewModel {
+extension SearchNewsViewModel {
     
     /// 畫面狀態 enum
     enum ViewState {
@@ -31,9 +31,9 @@ extension NewsListViewModel {
     }
 }
 
-/// 新聞列表頁面 ViewModel
+/// 新聞搜尋頁面 ViewModel
 @Observable
-class NewsListViewModel {
+class SearchNewsViewModel {
     
     // MARK: - Properties
     
@@ -58,12 +58,21 @@ class NewsListViewModel {
     
     // MARK: - Public Methods
     
-    /// 抓取所有新聞資料
-    func fetchNews() async {
+    /// 根據條件 (關鍵字、開始日期、結束日期) 搜尋新聞資料
+    ///
+    /// - Parameters:
+    ///   - keyword: 關鍵字
+    ///   - startDate: 開始日期
+    ///   - endDate: 結束日期
+    func searchNews(with keyword: String?, startDate: String?, endDate: String?) async {
         viewState = .loading
         do {
-            let fetchedNews = try await newsService.fetchNews()
-            newsItems = fetchedNews
+            let searchedNews = try await newsService.searchNews(
+                with: keyword,
+                startDate: startDate,
+                endDate: endDate
+            )
+            newsItems = searchedNews
             viewState = .loaded
         } catch {
             viewState = .error(error)
@@ -73,6 +82,10 @@ class NewsListViewModel {
 
 // MARK: - UI Sections (供 View 顯示用)
 
-extension NewsListViewModel: NewsGroupable {
-    // 使用 NewsGroupable 預設實作
+extension SearchNewsViewModel: NewsGroupable {
+    
+    /// 覆寫預設實作，改成日期由舊到新排序
+    var groupedSections: [NewsSection] {
+        groupNewsByDate(newsItems, sortOrder: .ascending)
+    }
 }
