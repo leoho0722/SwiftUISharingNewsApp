@@ -30,6 +30,18 @@ enum SFSymbols {
     
     /// SF Symbols icon 名稱：`link`
     case link
+
+    /// SF Symbols icon 名稱：`xmark.circle.fill`
+    case xmarkCircleFill
+
+    /// SF Symbols icon 名稱：`line.3.horizontal.decrease.circle`
+    case line3HorizontalDecreaseCircle
+
+    /// SF Symbols icon 名稱：`clock`
+    case clock
+
+    /// SF Symbols icon 名稱：`trash`
+    case trash
     
     /// SF Symbols icon 名稱
     var iconName: String {
@@ -48,6 +60,14 @@ enum SFSymbols {
             return "document.fill"
         case .link:
             return "link"
+        case .xmarkCircleFill:
+            return "xmark.circle.fill"
+        case .line3HorizontalDecreaseCircle:
+            return "line.3.horizontal.decrease.circle"
+        case .clock:
+            return "clock"
+        case .trash:
+            return "trash"
         }
     }
 }

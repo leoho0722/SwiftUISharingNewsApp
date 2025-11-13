@@ -86,6 +86,6 @@ extension SearchNewsViewModel: NewsGroupable {
     
     /// 覆寫預設實作，改成日期由舊到新排序
     var groupedSections: [NewsSection] {
-        groupNewsByDate(newsItems, sortOrder: .ascending)
+        groupNewsByDate(newsItems, sortOrder: .descending)
     }
 }
