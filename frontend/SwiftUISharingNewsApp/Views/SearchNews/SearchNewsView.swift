@@ -50,9 +50,7 @@ struct SearchNewsView: View {
         )
         .searchSuggestions { recentSearchSuggestions }
         .onSubmit(of: .search) {
-            Task {
-                await performSearch()
-            }
+            await performSearch()
         }
         .task {
             await purgeExpiredRecentSearches()
@@ -141,7 +139,7 @@ extension SearchNewsView {
         } description: {
             Text(error.localizedDescription)
         } actions: {
-            Button {
+            AsyncButton {
                 await performSearch()
             } label: {
                 Label("重新嘗試", symbols: .arrowCounterclockwise)
@@ -162,7 +160,7 @@ extension SearchNewsView {
             .accessibilityLabel("調整篩選條件")
             .tint(appliedDateFilter == nil ? .primary : .accentColor)
             
-            Button {
+            AsyncButton {
                 await performSearch()
             } label: {
                 Label("搜尋", symbols: .magnifyingglass)
@@ -178,7 +176,7 @@ extension SearchNewsView {
         else {
             Section("近期搜尋") {
                 ForEach(suggestions) { search in
-                    Button {
+                    AsyncButton {
                         applyRecentSearch(search)
                         await performSearch(saveToRecents: false)
                     } label: {
@@ -252,7 +250,7 @@ extension SearchNewsView {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.medium])
     }
 }
 

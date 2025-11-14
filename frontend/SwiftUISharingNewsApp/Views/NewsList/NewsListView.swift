@@ -72,7 +72,7 @@ extension NewsListView {
         ErrorView {
             Label("取得新聞資料失敗！", symbols: .exclamationmarkTriangleFill)
         } actions: {
-            Button {
+            AsyncButton {
                 await viewModel.fetchNews()
             } label: {
                 Label("點擊重試", symbols: .arrowCounterclockwise)
