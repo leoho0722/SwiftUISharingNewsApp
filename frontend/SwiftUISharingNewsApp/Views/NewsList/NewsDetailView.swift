@@ -47,17 +47,17 @@ struct NewsDetailView: View {
 
 // MARK: - ViewBuilder
 
-extension NewsDetailView {
+private extension NewsDetailView {
     
     /// 新聞標題
     @ViewBuilder
-    private var newsTitle: some View {
+    var newsTitle: some View {
         Text(newsItem.title)
     }
     
     /// 新聞日期 (上：發布日期，下：最後更新日期)
     @ViewBuilder
-    private var newsDate: some View {
+    var newsDate: some View {
         VStack(alignment: .leading) {
             Text("發布日期：\(newsItem.publishDate)")
             Text("最後更新日期：\(newsItem.modifiedDate)")
@@ -66,7 +66,7 @@ extension NewsDetailView {
     
     /// 新聞內容 (去除掉 HTML 標記)
     @ViewBuilder
-    private var newsContent: some View {
+    var newsContent: some View {
         Text(newsItem.content.removingHTMLTags)
     }
     
@@ -80,7 +80,7 @@ extension NewsDetailView {
     
     /// 新聞附加檔案
     @ViewBuilder
-    private var newsAttachmentFiles: some View {
+    var newsAttachmentFiles: some View {
         List {
             ForEach(Array(newsItem.attachmentFiles.enumerated()), id: \.element.id) { index, file in
                 Section("附件 \(index + 1)") {
@@ -102,26 +102,12 @@ extension NewsDetailView {
         }
     }
     
-    /// 檔案連結按鈕
-    ///
-    /// - Parameters:
-    ///   - fileURL: 檔案連結
-    @ViewBuilder
-    private func fileLinkButton(_ fileURL: URL) -> some View {
-        Button {
-            openURL(fileURL)
-        } label: {
-            Label("檔案連結", symbols: .link)
-                .padding(5)
-        }
-    }
-    
     /// 預覽檔案按鈕
     ///
     /// - Parameters:
     ///   - fileType: 檔案類型
     @ViewBuilder
-    private func previewFileButton(
+    func previewFileButton(
         _ fileURL: URL,
         fileType: NewsDetailViewModel.SupportedFileType
     ) -> some View {
@@ -147,7 +133,7 @@ extension NewsDetailView {
     ///   - fileURL: 檔案連結
     ///   - fileType: 檔案類型
     @ViewBuilder
-    private func previewFileSheet(
+    func previewFileSheet(
         _ fileURL: URL,
         fileType: NewsDetailViewModel.SupportedFileType
     ) -> some View {
@@ -180,7 +166,7 @@ extension NewsDetailView {
     /// - Parameters:
     ///   - imageURL: 圖片連結
     @ViewBuilder
-    private func previewImageContent(_ imageURL: URL) -> some View {
+    func previewImageContent(_ imageURL: URL) -> some View {
         AsyncImage(url: imageURL) { phase in
             switch phase {
             case .empty:

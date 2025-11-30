@@ -23,10 +23,10 @@ extension NewsListViewModel {
         /// 載入完成
         case loaded
         
-        /// 載入失敗
+        /// 發生失敗
         ///
         /// - Parameters:
-        ///   - error: 載入失敗的錯誤
+        ///   - error: 發生失敗的錯誤
         case error(Error)
     }
 }
