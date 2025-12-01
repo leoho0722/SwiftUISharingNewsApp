@@ -20,8 +20,8 @@ struct NewsDetailView: View {
     /// 開啟 URL 環境物件
     @Environment(\.openURL) private var openURL
     
-    /// 是否進行預覽檔案
-    @State private var isPreviewFile: Bool = false
+    /// 選擇的附加檔案
+    @State private var selectedAttachment: AttachmentFile?
     
     // MARK: - View Body
     
@@ -41,6 +41,9 @@ struct NewsDetailView: View {
             
             // 附加檔案
             newsAttachmentFiles
+        }
+        .sheet(item: $selectedAttachment) { attachment in
+            previewFileSheet(attachment)
         }
     }
 }
@@ -82,7 +85,10 @@ private extension NewsDetailView {
     @ViewBuilder
     var newsAttachmentFiles: some View {
         List {
-            ForEach(Array(newsItem.attachmentFiles.enumerated()), id: \.element.id) { index, file in
+            ForEach(
+                Array(newsItem.attachmentFiles.enumerated()),
+                id: \.element.id
+            ) { index, file in
                 Section("附件 \(index + 1)") {
                     Text("檔案名稱：\(file.fileName)")
                     Text("檔案說明：\(file.fileDescription)")
@@ -90,14 +96,13 @@ private extension NewsDetailView {
                     if let fileURL = URL(string: file.fileURL) {
                         let result = viewModel.canPreviewFile(file.fileExtension)
                         if result.canPreview {
-                            previewFileButton(fileURL, fileType: result.fileType)
-                                .sheet(isPresented: $isPreviewFile) {
-                                    previewFileSheet(fileURL, fileType: result.fileType)
-                                }
+                            previewFileButton(file, fileType: result.fileType)
+                        }
+                        else {
+                            LinkButton(title: "檔案連結", symbols: .link, url: fileURL)
                         }
                     }
                 }
-                
             }
         }
     }
@@ -105,14 +110,15 @@ private extension NewsDetailView {
     /// 預覽檔案按鈕
     ///
     /// - Parameters:
+    ///   - file: 附加檔案
     ///   - fileType: 檔案類型
     @ViewBuilder
     func previewFileButton(
-        _ fileURL: URL,
+        _ file: AttachmentFile,
         fileType: NewsDetailViewModel.SupportedFileType
     ) -> some View {
         Button {
-            isPreviewFile.toggle()
+            selectedAttachment = file
         } label: {
             switch fileType {
             case .image:
@@ -122,7 +128,7 @@ private extension NewsDetailView {
                 Label("預覽檔案", symbols: .documentFill)
                     .padding(5)
             case .unknown:
-                LinkButton(title: "檔案連結", symbols: .link, url: fileURL)
+                EmptyView()
             }
         }
     }
@@ -130,35 +136,44 @@ private extension NewsDetailView {
     /// 預覽檔案 Sheet
     ///
     /// - Parameters:
-    ///   - fileURL: 檔案連結
-    ///   - fileType: 檔案類型
+    ///   - attachment: 附加檔案
     @ViewBuilder
-    func previewFileSheet(
-        _ fileURL: URL,
-        fileType: NewsDetailViewModel.SupportedFileType
-    ) -> some View {
+    func previewFileSheet(_ attachment: AttachmentFile) -> some View {
+        let result = viewModel.canPreviewFile(attachment.fileExtension)
+        
         NavigationStack {
             Group {
-                switch fileType {
-                case .image:
-                    previewImageContent(fileURL)
-                default:
+                if let fileURL = URL(string: attachment.fileURL) {
+                    switch result.fileType {
+                    case .image:
+                        previewImageContent(fileURL)
+                    default:
+                        ErrorView {
+                            Label("不支援預覽的檔案格式", symbols: .exclamationmarkTriangleFill)
+                        } actions: {
+                            LinkButton(url: fileURL) {
+                                Label("檔案連結", symbols: .link)
+                            }
+                        }
+                    }
+                }
+                else {
                     ErrorView {
-                        Label("不支援的檔案格式", symbols: .exclamationmarkTriangleFill)
+                        Label("無效的檔案連結", symbols: .exclamationmarkTriangleFill)
                     }
                 }
             }
-            .navigationTitle(fileType == .image ? "圖片預覽" : "檔案預覽")
+            .navigationTitle(attachment.fileName)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("關閉") {
-                        isPreviewFile = false
+                        selectedAttachment = nil
                     }
                 }
             }
         }
-        .presentationDetents(fileType == .image ? [.medium] : [.large])
+        .presentationDetents(result.fileType == .image ? [.medium] : [.large])
     }
     
     /// 預覽圖片內容
