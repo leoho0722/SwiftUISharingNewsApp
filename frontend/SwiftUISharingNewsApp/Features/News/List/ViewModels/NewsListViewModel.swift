@@ -7,30 +7,6 @@
 
 import Foundation
 
-// MARK: - Nested Types
-
-extension NewsListViewModel {
-    
-    /// 畫面狀態 enum
-    enum ViewState {
-        
-        /// 閒置 (預設值)
-        case idle
-        
-        /// 載入中
-        case loading
-        
-        /// 載入完成
-        case loaded
-        
-        /// 發生失敗
-        ///
-        /// - Parameters:
-        ///   - error: 發生失敗的錯誤
-        case error(Error)
-    }
-}
-
 /// 新聞列表頁面 ViewModel
 @Observable
 class NewsListViewModel {
@@ -68,6 +44,30 @@ class NewsListViewModel {
         } catch {
             viewState = .error(error)
         }
+    }
+}
+
+// MARK: - Nested Types
+
+extension NewsListViewModel {
+    
+    /// 畫面狀態 enum
+    enum ViewState {
+        
+        /// 閒置 (預設值)
+        case idle
+        
+        /// 載入中
+        case loading
+        
+        /// 載入完成
+        case loaded
+        
+        /// 發生失敗
+        ///
+        /// - Parameters:
+        ///   - error: 發生失敗的錯誤
+        case error(Error)
     }
 }
 

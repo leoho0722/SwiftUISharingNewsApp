@@ -7,46 +7,7 @@
 
 import Foundation
 
-// MARK: - Nested Types
 
-extension SearchNewsViewModel {
-    
-    /// 畫面狀態 enum
-    enum ViewState {
-        
-        /// 閒置 (預設值)
-        case idle
-        
-        /// 載入中
-        case loading
-        
-        /// 載入完成
-        case loaded
-        
-        /// 發生錯誤
-        ///
-        /// - Parameters:
-        ///   - error: 發生的錯誤
-        case error(Error)
-    }
-    
-    /// 日期篩選條件的封裝模型
-    struct DateFilter: Equatable {
-        
-        /// 開始日期
-        var startDate: Date
-        
-        /// 結束日期
-        var endDate: Date
-        
-        /// 預設值 (最近一周)
-        static var defaultRange: DateFilter {
-            let now = Date()
-            let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: now) ?? now
-            return DateFilter(startDate: weekAgo, endDate: now)
-        }
-    }
-}
 
 /// 新聞搜尋頁面 ViewModel
 @Observable
@@ -187,6 +148,47 @@ class SearchNewsViewModel {
             try await repository?.purgeExpiredSearches()
         } catch {
             viewState = .error(error)
+        }
+    }
+}
+
+// MARK: - Nested Types
+
+extension SearchNewsViewModel {
+    
+    /// 畫面狀態 enum
+    enum ViewState {
+        
+        /// 閒置 (預設值)
+        case idle
+        
+        /// 載入中
+        case loading
+        
+        /// 載入完成
+        case loaded
+        
+        /// 發生錯誤
+        ///
+        /// - Parameters:
+        ///   - error: 發生的錯誤
+        case error(Error)
+    }
+    
+    /// 日期篩選條件的封裝模型
+    struct DateFilter: Equatable {
+        
+        /// 開始日期
+        var startDate: Date
+        
+        /// 結束日期
+        var endDate: Date
+        
+        /// 預設值 (最近一周)
+        static var defaultRange: DateFilter {
+            let now = Date()
+            let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: now) ?? now
+            return DateFilter(startDate: weekAgo, endDate: now)
         }
     }
 }
