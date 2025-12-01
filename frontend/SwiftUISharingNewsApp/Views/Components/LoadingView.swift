@@ -7,6 +7,18 @@
 
 import SwiftUI
 
+/// 顯示載入狀態的視圖，支援純文字或自定義 Label
+///
+/// ### 使用範例
+/// ```swift
+/// // 1. 使用純文字
+/// LoadingView("載入中...")
+///
+/// // 2. 使用自定義 Label (文字 + Icon)
+/// LoadingView {
+///     Label("處理中...", systemImage: "gear")
+/// }
+/// ```
 struct LoadingView<Title, Icon>: View where Title: View, Icon: View {
     
     // MARK: - View Properties
@@ -35,6 +47,9 @@ struct LoadingView<Title, Icon>: View where Title: View, Icon: View {
 
 extension LoadingView where Title == Text, Icon == EmptyView {
     
+    /// 使用純文字建立載入視圖
+    ///
+    /// - Parameter title: 載入時顯示的文字內容
     init<S>(_ title: S) where S: StringProtocol {
         self.title = title as? String
         self.label = nil
@@ -45,6 +60,9 @@ extension LoadingView where Title == Text, Icon == EmptyView {
 
 extension LoadingView where Title == Text, Icon == Image {
     
+    /// 使用 Label 建立載入視圖
+    ///
+    /// - Parameter label: 包含文字與圖示的 Label ViewBuilder
     init(@ViewBuilder label: @escaping () -> Label<Title, Icon>) {
         self.title = nil
         self.label = label
