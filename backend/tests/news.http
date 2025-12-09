@@ -1,0 +1,16 @@
+@baseUrl = https://o1tf5cjqzk.execute-api.ap-northeast-1.amazonaws.com
+@stage = default
+@contentType = application/json
+
+### 1. 取得所有新聞列表 (GET /news)
+GET {{baseUrl}}/{{stage}}/news HTTP/1.1
+
+### 2. 根據 `關鍵字`、`日期範圍` 搜尋新聞 (POST /searchNews)
+POST {{baseUrl}}/{{stage}}/searchNews HTTP/1.1
+Content-Type: {{contentType}}
+
+{
+    "keyword": "測試",
+    "start_date": "2024-01-01",
+    "end_date": "2024-12-31"
+}
