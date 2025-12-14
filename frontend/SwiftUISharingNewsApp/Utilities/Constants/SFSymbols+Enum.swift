@@ -42,6 +42,12 @@ enum SFSymbols {
 
     /// SF Symbols icon 名稱：`trash`
     case trash
+
+    /// SF Symbols icon 名稱：`wifi.slash`
+    case wifiSlash
+
+    /// SF Symbols icon 名稱：`gear.circle`
+    case gearCircle
     
     /// SF Symbols icon 名稱
     var iconName: String {
@@ -68,6 +74,10 @@ enum SFSymbols {
             return "clock"
         case .trash:
             return "trash"
+        case .wifiSlash:
+            return "wifi.slash"
+        case .gearCircle:
+            return "gear.circle"
         }
     }
 }

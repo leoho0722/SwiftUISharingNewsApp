@@ -14,19 +14,27 @@ struct NewsListView: View {
     
     /// ViewModel
     @State private var viewModel = NewsListViewModel()
+
+    /// 網路狀態監控器
+    @Environment(\.networkMonitor) private var networkMonitor
     
     // MARK: - View Body
     
     var body: some View {
         NavigationStack {
             VStack {
-                switch viewModel.viewState {
-                case .idle, .loading:
-                    loadingView
-                case .loaded:
-                    newsList
-                case .error:
-                    errorView
+                if networkMonitor.isConnected {
+                    switch viewModel.viewState {
+                    case .idle, .loading:
+                        loadingView
+                    case .loaded:
+                        newsList
+                    case .error:
+                        errorView
+                    }
+                }
+                else {
+                    NetworkErrorView()
                 }
             }
             .navigationTitle("新聞列表")

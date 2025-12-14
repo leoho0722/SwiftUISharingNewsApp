@@ -22,6 +22,9 @@ struct SearchNewsView: View {
     /// 是否顯示篩選面板
     @State private var isFilterSheetPresented: Bool = false
     
+    /// 網路狀態監控器
+    @Environment(\.networkMonitor) private var networkMonitor
+    
     /// SwiftData ModelContext
     @Environment(\.modelContext) private var modelContext
     
@@ -32,32 +35,37 @@ struct SearchNewsView: View {
     // MARK: - View Body
     
     var body: some View {
-        NavigationStack {
-            content
-                .navigationTitle("搜尋新聞")
-                .toolbar {
-                    toolbarContent
-                }
-                .sheet(isPresented: $isFilterSheetPresented) {
-                    filterSheet
-                }
+        if networkMonitor.isConnected {
+            NavigationStack {
+                content
+                    .navigationTitle("搜尋新聞")
+                    .toolbar {
+                        toolbarContent
+                    }
+                    .sheet(isPresented: $isFilterSheetPresented) {
+                        filterSheet
+                    }
+            }
+            .searchable(
+                text: $viewModel.inputKeyword,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "請輸入新聞關鍵字"
+            )
+            .searchSuggestions { recentSearchSuggestions }
+            .onSubmit(of: .search) {
+                await viewModel.performSearch()
+            }
+            .task {
+                // 設定 Repository 到 ViewModel
+                let repository = RecentSearchRepository(modelContext: modelContext)
+                viewModel.configure(repository: repository)
+                
+                // 清除過期的近期搜尋紀錄
+                await viewModel.purgeExpiredRecentSearches()
+            }
         }
-        .searchable(
-            text: $viewModel.inputKeyword,
-            placement: .navigationBarDrawer(displayMode: .always),
-            prompt: "請輸入新聞關鍵字"
-        )
-        .searchSuggestions { recentSearchSuggestions }
-        .onSubmit(of: .search) {
-            await viewModel.performSearch()
-        }
-        .task {
-            // 設定 Repository 到 ViewModel
-            let repository = RecentSearchRepository(modelContext: modelContext)
-            viewModel.configure(repository: repository)
-            
-            // 清除過期的近期搜尋紀錄
-            await viewModel.purgeExpiredRecentSearches()
+        else {
+            NetworkErrorView()
         }
     }
 }
@@ -179,7 +187,7 @@ private extension SearchNewsView {
         let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? .distantPast
         let suggestions = recentSearches.filter { $0.createdAt >= cutoff }
         
-        if suggestions.isEmpty { 
+        if suggestions.isEmpty {
             EmptyView()
         }
         else {
