@@ -23,10 +23,17 @@ struct SwiftUISharingNewsAppApp: App {
         }
     }()
     
+    /// 全域網路狀態監控器
+    @State private var networkMonitor = NetworkMonitor()
+    
     var body: some Scene {
         WindowGroup {
             HomeView()
+                .task {
+                    await networkMonitor.start()
+                }
         }
         .modelContainer(sharedModelContainer)
+        .environment(\.networkMonitor, networkMonitor)
     }
 }
