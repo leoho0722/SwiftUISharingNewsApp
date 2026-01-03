@@ -1,0 +1,83 @@
+//
+//  SFSymbols+Enum.swift
+//  SwiftUISharingNewsAppFinal
+//
+//  Created by Leo Ho on 2025/11/2.
+//
+
+import Foundation
+
+/// 定義專案中有用到的 SF Symbols icon 名稱
+enum SFSymbols {
+    
+    /// SF Symbols icon 名稱：`exclamationmark.triangle.fill`
+    case exclamationmarkTriangleFill
+    
+    /// SF Symbols icon 名稱：`arrow.counterclockwise`
+    case arrowCounterclockwise
+    
+    /// SF Symbols icon 名稱：`newspaper.fill`
+    case newspaperFill
+    
+    /// SF Symbols icon 名稱：`magnifyingglass`
+    case magnifyingglass
+    
+    /// SF Symbols icon 名稱：`photo.fill`
+    case photoFill
+    
+    /// SF Symbols icon 名稱：`document.fill`
+    case documentFill
+    
+    /// SF Symbols icon 名稱：`link`
+    case link
+
+    /// SF Symbols icon 名稱：`xmark.circle.fill`
+    case xmarkCircleFill
+
+    /// SF Symbols icon 名稱：`line.3.horizontal.decrease.circle`
+    case line3HorizontalDecreaseCircle
+
+    /// SF Symbols icon 名稱：`clock`
+    case clock
+
+    /// SF Symbols icon 名稱：`trash`
+    case trash
+
+    /// SF Symbols icon 名稱：`wifi.slash`
+    case wifiSlash
+
+    /// SF Symbols icon 名稱：`gear.circle`
+    case gearCircle
+    
+    /// SF Symbols icon 名稱
+    var iconName: String {
+        switch self {
+        case .exclamationmarkTriangleFill:
+            return "exclamationmark.triangle.fill"
+        case .arrowCounterclockwise:
+            return "arrow.counterclockwise"
+        case .newspaperFill:
+            return "newspaper.fill"
+        case .magnifyingglass:
+            return "magnifyingglass"
+        case .photoFill:
+            return "photo.fill"
+        case .documentFill:
+            return "document.fill"
+        case .link:
+            return "link"
+        case .xmarkCircleFill:
+            return "xmark.circle.fill"
+        case .line3HorizontalDecreaseCircle:
+            return "line.3.horizontal.decrease.circle"
+        case .clock:
+            return "clock"
+        case .trash:
+            return "trash"
+        case .wifiSlash:
+            return "wifi.slash"
+        case .gearCircle:
+            return "gear.circle"
+        }
+    }
+}
