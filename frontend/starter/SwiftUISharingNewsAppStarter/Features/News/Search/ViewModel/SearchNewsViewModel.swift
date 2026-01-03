@@ -1,0 +1,143 @@
+//
+//  SearchNewsViewModel.swift
+//  SwiftUISharingNewsAppStarter
+//
+//  Created by Leo Ho on 2025/11/4.
+//
+
+import Foundation
+import Observation
+
+/// 新聞搜尋頁面 ViewModel
+@Observable
+class SearchNewsViewModel {
+    
+    // MARK: - Properties
+    
+    /// 新聞列表
+    private(set) var newsItems: [NewsItem] = []
+    
+    /// 畫面狀態
+    private(set) var viewState: ViewState = .idle
+    
+    /// 輸入的新聞關鍵字
+    var inputKeyword = ""
+    
+    /// 已套用的日期篩選條件
+    var appliedDateFilter: DateFilter?
+    
+    /// 新聞服務實例，透過依賴注入 (DI) 提供
+    private let newsService: NewsServiceProtocol
+    
+    // MARK: - Init
+    
+    /// 初始化 `SearchNewsViewModel`
+    ///
+    /// - Parameter newsService: 新聞服務實例
+    init(newsService: NewsServiceProtocol = NewsService()) {
+        self.newsService = newsService
+    }
+}
+
+// MARK: - Nested Types
+
+extension SearchNewsViewModel {
+    
+    /// 畫面狀態 enum
+    /// 
+    /// - idle：閒置 (預設值)
+    /// - loading：載入中
+    /// - loaded：載入完成
+    /// - error：發生錯誤
+    enum ViewState {
+        
+        /// 閒置 (預設值)
+        case idle
+        
+        /// 載入中
+        case loading
+        
+        /// 載入完成
+        case loaded
+        
+        /// 發生錯誤
+        ///
+        /// - Parameter error: 發生的錯誤
+        case error(Error)
+    }
+    
+    /// 日期篩選條件的封裝模型
+    struct DateFilter: Equatable {
+        
+        /// 開始日期
+        var startDate: Date
+        
+        /// 結束日期
+        var endDate: Date
+        
+        /// 預設值 (最近一周)
+        static var defaultRange: DateFilter {
+            let now = Date()
+            let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: now) ?? now
+            return DateFilter(startDate: weekAgo, endDate: now)
+        }
+    }
+}
+
+// MARK: - Internal Method
+
+extension SearchNewsViewModel {
+    
+    /// 執行搜尋請求
+    @MainActor
+    func performSearch() async {
+        let keyword = inputKeyword.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedKeyword = keyword.isEmpty ? nil : keyword
+        let startDate = appliedDateFilter?.startDate
+        let endDate = appliedDateFilter?.endDate
+        
+        viewState = .loading
+        
+        do {
+            let searchedNews = try await newsService.searchNews(
+                with: normalizedKeyword,
+                startDate: startDate.map { $0.formatted(.backend) },
+                endDate: endDate.map { $0.formatted(.backend) }
+            )
+            newsItems = searchedNews
+            viewState = .loaded
+        } catch {
+            viewState = .error(error)
+        }
+    }
+    
+    /// 將編輯中的暫存日期恢復為目前已套用的狀態
+    /// 
+    /// 如果沒有已套用的日期篩選，則回傳預設值。
+    /// 
+    /// - Returns: 日期篩選 `DateFilter`
+    func restoreDraftDateFilter() -> DateFilter {
+        return appliedDateFilter ?? .defaultRange
+    }
+    
+    /// 清除目前的日期篩選設定
+    func clearDateFilters() {
+        appliedDateFilter = nil
+    }
+    
+    /// 同時清除關鍵字與日期條件
+    func clearAllConditions() {
+        inputKeyword = ""
+        clearDateFilters()
+    }
+}
+
+// MARK: - UI Sections (供 View 顯示用)
+
+extension SearchNewsViewModel: NewsGroupable {
+    
+    /// 覆寫預設實作，改成日期由舊到新排序
+    var groupedSections: [NewsSection] {
+        groupNewsByDate(newsItems, sortOrder: .descending)
+    }
+}
