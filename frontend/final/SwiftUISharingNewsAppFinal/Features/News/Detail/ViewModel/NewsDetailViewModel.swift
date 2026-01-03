@@ -13,22 +13,8 @@ final class NewsDetailViewModel {
     // MARK: - Properties
     
     
-    // MARK: - Initializer
+    // MARK: - Init
     
-    
-    // MARK: - Public Methods
-    
-    /// 是否可以進行檔案預覽
-    ///
-    /// 目前支援 `jpg`、`jpeg`、`png`、`pdf` 副檔名進行預覽
-    ///
-    /// - Parameters:
-    ///   - fileExtension: 檔案副檔名
-    /// - Returns: 包含判斷結果與檔案類型的 tuple (canPreview: Bool, fileType: SupportedFileType)
-    func canPreviewFile(_ fileExtension: String) -> (canPreview: Bool, fileType: SupportedFileType) {
-        let fileType = SupportedFileType(fileExtension: fileExtension)
-        return (fileType.canPreview, fileType)
-    }
 }
 
 // MARK: - Nested Types
@@ -36,6 +22,11 @@ final class NewsDetailViewModel {
 extension NewsDetailViewModel {
     
     /// 支援的檔案副檔名
+    /// 
+    /// - jpg, jpeg：JPG、JPEG
+    /// - png：PNG
+    /// - pdf：PDF
+    /// - unsupported：未支援
     enum SupportedFileExtension: CaseIterable {
         
         /// JPG、JPEG
@@ -52,8 +43,7 @@ extension NewsDetailViewModel {
         
         /// 根據副檔名初始化
         ///
-        /// - Parameters:
-        ///   - fileExtension: 檔案副檔名
+        /// - Parameter fileExtension: 檔案副檔名
         init(fileExtension: String) {
             let lowercased = fileExtension.lowercased()
             switch lowercased {
@@ -72,6 +62,10 @@ extension NewsDetailViewModel {
     }
     
     /// 支援的檔案種類
+    /// 
+    /// - image：圖片 (jpg、jpeg、png)
+    /// - file：檔案 (pdf)
+    /// - unknown：未知
     enum SupportedFileType: Equatable {
         
         /// 圖片 (jpg、jpeg、png)
@@ -85,8 +79,7 @@ extension NewsDetailViewModel {
         
         /// 根據副檔名初始化
         ///
-        /// - Parameters:
-        ///   - fileExtension: 檔案副檔名
+        /// - Parameter fileExtension: 檔案副檔名
         init(fileExtension: String) {
             let fileExt = SupportedFileExtension(fileExtension: fileExtension)
             switch fileExt {
@@ -103,5 +96,19 @@ extension NewsDetailViewModel {
         var canPreview: Bool {
             return self != .unknown
         }
+    }
+}
+
+// MARK: - Internal Method
+
+extension NewsDetailViewModel {
+    
+    /// 判斷是否可以預覽檔案
+    ///
+    /// - Parameter fileExtension: 檔案副檔名
+    /// - Returns: 是否可以預覽及檔案類型
+    func canPreviewFile(_ fileExtension: String) -> (canPreview: Bool, fileType: SupportedFileType) {
+        let fileType = SupportedFileType(fileExtension: fileExtension)
+        return (fileType.canPreview, fileType)
     }
 }

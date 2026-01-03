@@ -49,7 +49,7 @@ struct LinkButton<Content>: View where Content: View {
     }
 }
 
-// MARK: - Initializer
+// MARK: - Init
 
 extension LinkButton where Content == Label<Text, Image> {
     
@@ -97,7 +97,7 @@ extension LinkButton where Content == Label<Text, Image> {
     }
 }
 
-// MARK: - Previews
+// MARK: - Preview
 
 #Preview {
     LinkButton(

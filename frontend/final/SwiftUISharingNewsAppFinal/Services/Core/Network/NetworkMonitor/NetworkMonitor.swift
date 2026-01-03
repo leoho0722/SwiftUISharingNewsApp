@@ -110,7 +110,7 @@ final class NetworkMonitor: @unchecked Sendable {
     /// 目前的網路狀態是否連線
     private(set) var isConnected: Bool = false
 
-    // MARK: - Initializer
+    // MARK: - Init
 
     /// 當 `NetworkMonitor` 被釋放時，停止監控網路狀態
     deinit {
@@ -139,7 +139,7 @@ extension NetworkMonitor: NetworkMonitorProtocol {
     }
 }
 
-// MARK: - Private Methods
+// MARK: - Private Method
 
 private extension NetworkMonitor {
     

@@ -40,72 +40,95 @@ protocol NetworkServiceProtocol {
 }
 
 /// 網路服務實作類別
-final class NetworkService: NetworkServiceProtocol {
+final class NetworkService {
     
     // MARK: - Properties
     
     /// URLSession 實例
     private let urlSession: URLSession
     
-    // MARK: - Initializer
+    // MARK: - Init
     
-    /// 初始化
+    /// 初始化 `NetworkService`
     init() {
         let configuration = URLSessionConfiguration.default
         configuration.timeoutIntervalForRequest = 30 // 設定請求超時時間為 30 秒
         urlSession = URLSession(configuration: configuration)
     }
+}
+
+// MARK: - NetworkServiceProtocol
+
+extension NetworkService: NetworkServiceProtocol {
     
-    // MARK: - Public Methods
-    
+    /// 發送 GET 請求
+    ///
+    /// - Parameters:
+    ///   - stage: API 部署環境
+    ///   - route: API 路由
+    ///   - requestObject: API 請求 body 物件
+    /// - Returns: 伺服器回傳的資料
+    /// - Throws: `NetworkServiceError`
     func get<E, D>(
         stage: NetworkConstants.APIStage,
         route: NetworkConstants.Routes,
         requestObject: E
     ) async throws(NetworkServiceError) -> D where E: Encodable, D: Decodable {
+        let request = try buildURLRequest(
+            with: .get,
+            stage: stage,
+            route: route,
+            body: requestObject
+        )
+        
         do {
-            let request = try buildURLRequest(
-                with: .get,
-                stage: stage,
-                route: route,
-                body: requestObject
-            )
-            
             let (data, response) = try await urlSession.data(for: request)
+            
             try validateResponse(response)
+            
             let decodedData: D = try decodeResponseData(with: data)
+            
             return decodedData
-        } catch let error as DecodingError {
+        } catch (let error as DecodingError) {
             throw NetworkServiceError.decodingFailed(decodingError: error)
-        } catch let error as NetworkServiceError {
+        } catch (let error as NetworkServiceError) {
             throw error
         } catch {
             throw NetworkServiceError.unknownError(error: error)
         }
     }
     
+    /// 發送 POST 請求
+    ///
+    /// - Parameters:
+    ///   - stage: API 部署環境
+    ///   - route: API 路由
+    ///   - requestObject: API 請求 body 物件
+    /// - Returns: 伺服器回傳的資料
+    /// - Throws: `NetworkServiceError`
     func post<E, D>(
         stage: NetworkConstants.APIStage,
         route: NetworkConstants.Routes,
         requestObject: E
     ) async throws(NetworkServiceError) -> D where E: Encodable, D: Decodable {
+        let request = try buildURLRequest(
+            with: .post,
+            stage: stage,
+            route: route,
+            body: requestObject
+        )
+        
         do {
-            let request = try buildURLRequest(
-                with: .post,
-                stage: stage,
-                route: route,
-                body: requestObject
-            )
-            
             let (data, response) = try await urlSession.data(for: request)
+            
             try validateResponse(response)
+            
             let decodedData: D = try decodeResponseData(with: data)
+            
             return decodedData
-        } catch let error as EncodingError {
-            throw NetworkServiceError.encodingFailed(encodingError: error)
-        } catch let error as DecodingError {
+        } catch (let error as DecodingError) {
             throw NetworkServiceError.decodingFailed(decodingError: error)
-        } catch let error as NetworkServiceError {
+        } catch (let error as NetworkServiceError) {
             throw error
         } catch {
             throw NetworkServiceError.unknownError(error: error)
@@ -113,7 +136,7 @@ final class NetworkService: NetworkServiceProtocol {
     }
 }
 
-// MARK: - Private Methods
+// MARK: - Private Method
 
 private extension NetworkService {
     
@@ -157,8 +180,7 @@ private extension NetworkService {
     
     /// 驗證 HTTP Response
     ///
-    /// - Parameters:
-    ///   - response: URLResponse 物件
+    /// - Parameter response: URLResponse 物件
     /// - Throws: `NetworkServiceError`，當回應無效或狀態碼不在 200-299 範圍內
     func validateResponse(_ response: URLResponse) throws(NetworkServiceError) {
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -172,8 +194,7 @@ private extension NetworkService {
     
     /// 將伺服器回傳的 Response Data 解析成 Decodable 物件
     ///
-    /// - Parameters:
-    ///   - responseData: 伺服器回傳的 Response Data
+    /// - Parameter responseData: 伺服器回傳的 Response Data
     /// - Returns: Decodable 物件
     /// - Throws: `DecodingError`
     func decodeResponseData<D>(with responseData: Data) throws -> D where D: Decodable {

@@ -8,6 +8,14 @@
 import Foundation
 
 /// 網路服務錯誤類型
+/// 
+/// - invalidURL：無效的 URL
+/// - encodingFailed：JSON 編碼失敗
+/// - invalidResponse：無效的 Response
+/// - emptyResponseData：Response 資料為空
+/// - httpError：HTTP 狀態碼錯誤
+/// - decodingFailed：JSON 解碼失敗
+/// - unknownError：未知錯誤
 enum NetworkServiceError: Error {
     
     /// 無效的 URL
@@ -15,8 +23,7 @@ enum NetworkServiceError: Error {
     
     /// JSON 編碼失敗
     ///
-    /// - Parameters:
-    ///   - encodingError: 具體的編碼錯誤資訊
+    /// - Parameter encodingError: 具體的編碼錯誤資訊
     case encodingFailed(encodingError: EncodingError)
 
     /// 無效的 Response
@@ -27,19 +34,16 @@ enum NetworkServiceError: Error {
 
     /// HTTP 狀態碼錯誤
     ///
-    /// - Parameters:
-    ///   - statusCode: 回傳的 HTTP 狀態碼
+    /// - Parameter statusCode: 回傳的 HTTP 狀態碼
     case httpError(statusCode: Int)
     
     /// JSON 解碼失敗
     ///
-    /// - Parameters:
-    ///   - decodingError: 具體的解碼錯誤資訊
+    /// - Parameter decodingError: 具體的解碼錯誤資訊
     case decodingFailed(decodingError: DecodingError)
     
     /// 未知錯誤
     ///
-    /// - Parameters:
-    ///   - error: 原始錯誤
+    /// - Parameter error: 原始錯誤
     case unknownError(error: Error)
 }

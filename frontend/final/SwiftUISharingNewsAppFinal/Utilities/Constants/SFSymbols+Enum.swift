@@ -8,6 +8,20 @@
 import Foundation
 
 /// 定義專案中有用到的 SF Symbols icon 名稱
+/// 
+/// - exclamationmarkTriangleFill：`exclamationmark.triangle.fill`
+/// - arrowCounterclockwise：`arrow.counterclockwise`
+/// - newspaperFill：`newspaper.fill`
+/// - magnifyingglass：`magnifyingglass`
+/// - photoFill：`photo.fill`
+/// - documentFill：`document.fill`
+/// - link：`link`
+/// - xmarkCircleFill：`xmark.circle.fill`
+/// - line3HorizontalDecreaseCircle：`line.3.horizontal.decrease.circle`
+/// - clock：`clock`
+/// - trash：`trash`
+/// - wifiSlash：`wifi.slash`
+/// - gearCircle：`gear.circle`
 enum SFSymbols {
     
     /// SF Symbols icon 名稱：`exclamationmark.triangle.fill`

@@ -8,6 +8,9 @@
 import Foundation
 
 /// 排序方式 enum
+/// 
+/// - descending：由新到舊
+/// - ascending：由舊到新
 enum SortOrder {
     
     /// 由新到舊

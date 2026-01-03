@@ -40,7 +40,7 @@ struct NewsListViewModelTests {
         let mockService = MockNewsService()
         let expectedNews = NewsItemFactory.makeList(count: 3)
         mockService.fetchNewsResult = .success(expectedNews)
-        let viewModel = NewsListViewModel(newsService: mockService)
+        let viewModel = await NewsListViewModel(newsService: mockService)
         
         // When
         await viewModel.fetchNews()
@@ -49,10 +49,10 @@ struct NewsListViewModelTests {
         #expect(viewModel.newsItems.count == 3)
         #expect(mockService.fetchNewsCallCount == 1)
         
-        if case .loaded = viewModel.viewState {
+        if case .loaded = await viewModel.viewState {
             // 正確
         } else {
-            Issue.record("預期 viewState 為 .loaded，但實際為 \(viewModel.viewState)")
+            Issue.record("預期 viewState 為 .loaded，但實際為 \(await viewModel.viewState)")
         }
     }
     
@@ -66,7 +66,7 @@ struct NewsListViewModelTests {
             networkError: .invalidURL
         )
         mockService.fetchNewsResult = .failure(expectedError)
-        let viewModel = NewsListViewModel(newsService: mockService)
+        let viewModel = await NewsListViewModel(newsService: mockService)
         
         // When
         await viewModel.fetchNews()
@@ -75,10 +75,10 @@ struct NewsListViewModelTests {
         #expect(viewModel.newsItems.isEmpty)
         #expect(mockService.fetchNewsCallCount == 1)
         
-        if case .error = viewModel.viewState {
+        if case .error = await viewModel.viewState {
             // 正確
         } else {
-            Issue.record("預期 viewState 為 .error，但實際為 \(viewModel.viewState)")
+            Issue.record("預期 viewState 為 .error，但實際為 \(await viewModel.viewState)")
         }
     }
     
@@ -91,7 +91,7 @@ struct NewsListViewModelTests {
         let firstBatch = NewsItemFactory.makeList(count: 2)
         let secondBatch = NewsItemFactory.makeList(count: 5)
         mockService.fetchNewsResult = .success(firstBatch)
-        let viewModel = NewsListViewModel(newsService: mockService)
+        let viewModel = await NewsListViewModel(newsService: mockService)
         
         // When - 第一次抓取
         await viewModel.fetchNews()

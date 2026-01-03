@@ -59,7 +59,7 @@ struct ErrorView<Label, Description, Actions>: View where Label: View, Descripti
     }
 }
 
-// MARK: - Initializer
+// MARK: - Init
 
 // MARK: 使用 Label、Description、Actions 進行初始化
 
@@ -109,7 +109,7 @@ extension ErrorView where Label == SwiftUI.Label<Text, Image>, Description == Te
     }
 }
 
-// MARK: - Previews
+// MARK: - Preview
 
 #Preview("使用 String 跟 SF Symbols init") {
     ErrorView("取得圖片失敗！", symbols: .exclamationmarkTriangleFill)

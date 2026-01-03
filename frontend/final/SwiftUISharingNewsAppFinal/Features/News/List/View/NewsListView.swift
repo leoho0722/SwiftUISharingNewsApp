@@ -56,7 +56,7 @@ extension NewsListView {
         LoadingView("取得新聞資料中...")
     }
     
-    /// 新聞列表（依發布「日期」分組成 Section），所有邏輯由 ViewModel 提供
+    /// 新聞列表 (依發布「日期」分組成 Section)，所有邏輯由 ViewModel 提供
     @ViewBuilder
     private var newsList: some View {
         List {

@@ -42,8 +42,44 @@ struct NewsItem: Identifiable, Codable {
     }
 }
 
+// MARK: - Nested Types
+
 extension NewsItem {
     
+    /// 附加檔案
+    struct AttachmentFile: Identifiable, Codable {
+        
+        /// 附加檔案 UUID
+        let id = UUID()
+        
+        /// 檔案名稱
+        let fileName: String
+        
+        /// 檔案說明
+        let fileDescription: String
+        
+        /// 檔案連結位置
+        let fileURL: String
+        
+        /// 檔案副檔名
+        var fileExtension: String {
+            return (fileName as NSString).pathExtension
+        }
+        
+        enum CodingKeys: String, CodingKey {
+            case id
+            case fileName = "filename"
+            case fileDescription = "file_description"
+            case fileURL = "file_url"
+        }
+    }
+}
+
+// MARK: - Preview
+
+extension NewsItem {
+    
+    /// 畫面預覽值
     static var previewValue: Self {
         .init(
             title: "蛇年4招守腰圍  健康迎春過好年",
@@ -64,33 +100,5 @@ extension NewsItem {
                 )
             ]
         )
-    }
-}
-
-/// 附加檔案
-struct AttachmentFile: Identifiable, Codable {
-    
-    /// 附加檔案 UUID
-    let id = UUID()
-    
-    /// 檔案名稱
-    let fileName: String
-    
-    /// 檔案說明
-    let fileDescription: String
-    
-    /// 檔案連結位置
-    let fileURL: String
-    
-    /// 檔案副檔名
-    var fileExtension: String {
-        return (fileName as NSString).pathExtension
-    }
-    
-    enum CodingKeys: String, CodingKey {
-        case id
-        case fileName = "filename"
-        case fileDescription = "file_description"
-        case fileURL = "file_url"
     }
 }

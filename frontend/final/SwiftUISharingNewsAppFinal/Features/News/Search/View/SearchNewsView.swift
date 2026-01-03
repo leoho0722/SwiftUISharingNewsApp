@@ -86,7 +86,8 @@ private extension SearchNewsView {
             case .loaded:
                 if viewModel.groupedSections.isEmpty {
                     emptyStateView
-                } else {
+                }
+                else {
                     resultsList
                 }
             case .error(let error):
@@ -97,6 +98,7 @@ private extension SearchNewsView {
         .background(Color(uiColor: .systemGroupedBackground))
     }
     
+    /// 閒置狀態畫面
     @ViewBuilder
     var idleStateView: some View {
         ContentUnavailableView {
@@ -106,6 +108,7 @@ private extension SearchNewsView {
         }
     }
     
+    /// 查無新聞狀態畫面
     @ViewBuilder
     var emptyStateView: some View {
         ContentUnavailableView {
@@ -121,6 +124,7 @@ private extension SearchNewsView {
         }
     }
     
+    /// 搜尋到的新聞列表清單
     @ViewBuilder
     var resultsList: some View {
         List {
@@ -141,8 +145,7 @@ private extension SearchNewsView {
     
     /// 根據錯誤狀態呈現錯誤畫面與重試動作。
     ///
-    /// - Parameters:
-    ///   - error: 透過 ViewModel 回傳的錯誤。
+    /// - Parameter error: 透過 ViewModel 回傳的錯誤。
     /// - Returns: 包含錯誤訊息與重試按鈕的視圖。
     @ViewBuilder
     func errorStateView(_ error: any Error) -> some View {
@@ -160,14 +163,15 @@ private extension SearchNewsView {
         }
     }
     
+    /// Navigation RightBarButtonItems
     @ToolbarContentBuilder
     var toolbarContent: some ToolbarContent {
         ToolbarItemGroup(placement: .topBarTrailing) {
             Button {
-                draftDateFilter = viewModel.appliedDateFilter ?? .defaultRange
+                draftDateFilter = viewModel.restoreDraftDateFilter()
                 isFilterSheetPresented = true
             } label: {
-                Label(filterToolbarTitle, symbols: .line3HorizontalDecreaseCircle)
+                Image(symbols: .line3HorizontalDecreaseCircle)
             }
             .accessibilityLabel("調整篩選條件")
             .tint(viewModel.appliedDateFilter == nil ? .primary : .accentColor)
@@ -181,6 +185,7 @@ private extension SearchNewsView {
         }
     }
     
+    /// 近期搜尋建議畫面
     @ViewBuilder
     var recentSearchSuggestions: some View {
         // 這裡簡單過濾，或可呼叫 ViewModel 的 helper
@@ -216,6 +221,7 @@ private extension SearchNewsView {
         }
     }
     
+    /// 日期篩選 Sheet
     @ViewBuilder
     var filterSheet: some View {
         NavigationStack {
@@ -239,20 +245,20 @@ private extension SearchNewsView {
                     }
                 }
             }
-            .environment(\.locale, userPreferredLocale)
+            .environment(\.locale, .autoupdatingCurrent)
             .navigationTitle("篩選條件")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("取消") {
-                        restoreDraftDateFilter()
+                        draftDateFilter = viewModel.restoreDraftDateFilter()
                         isFilterSheetPresented = false
                     }
                 }
                 ToolbarItem(placement: .bottomBar) {
                     Button("重設篩選") {
                         viewModel.clearDateFilters()
-                        restoreDraftDateFilter()
+                        draftDateFilter = viewModel.restoreDraftDateFilter()
                         isFilterSheetPresented = false
                     }
                     .tint(.red)
@@ -284,27 +290,9 @@ private extension SearchNewsView {
 
 private extension SearchNewsView {
     
-    /// 依據已套用的日期條件產生工具列標題文字。
-    var filterToolbarTitle: String {
-        guard let appliedDateFilter = viewModel.appliedDateFilter else {
-            return "不限日期"
-        }
-        
-        let startDateFormatted = appliedDateFilter.startDate.formatted(.display)
-        let endDateFormatted = appliedDateFilter.endDate.formatted(.display)
-        
-        return "篩選：\(startDateFormatted) - \(endDateFormatted)"
-    }
-    
-    /// 使用者偏好的語系（依系統語言自動更新）。
-    var userPreferredLocale: Locale {
-        Locale.autoupdatingCurrent
-    }
-    
     /// 依據關鍵字或日期組合，生成顯示在建議列的標題。
     ///
-    /// - Parameters:
-    ///   - search: 準備顯示的近期搜尋紀錄。
+    /// - Parameter search: 準備顯示的近期搜尋紀錄。
     /// - Returns: 顯示於搜尋建議的標題文字。
     func recentSearchTitle(for search: RecentSearch) -> String {
         if let keyword = search.keyword, !keyword.isEmpty {
@@ -318,10 +306,5 @@ private extension SearchNewsView {
             return "\(startDateFormatted) - \(endDateFormatted)"
         }
         return "未命名搜尋"
-    }
-    
-    /// 將編輯中的暫存日期恢復為目前已套用的狀態。
-    func restoreDraftDateFilter() {
-        draftDateFilter = viewModel.appliedDateFilter ?? .defaultRange
     }
 }

@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct HomeView: View {
+
+    // MARK: - View Body
+
     var body: some View {
         if #available(iOS 18.0, *) {
             TabView {
@@ -37,6 +40,8 @@ struct HomeView: View {
         }
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     HomeView()

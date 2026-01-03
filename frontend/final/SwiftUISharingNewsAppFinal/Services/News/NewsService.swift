@@ -32,33 +32,35 @@ protocol NewsServiceProtocol {
 }
 
 /// 新聞服務實作類別
-final class NewsService: NewsServiceProtocol {
+final class NewsService {
     
     // MARK: - Properties
     
     /// 網路服務實例
     private let networkService: NetworkServiceProtocol
     
-    // MARK: - Initializer
+    // MARK: - Init
     
-    /// 初始化
+    /// 初始化 `NewsService`
     ///
-    /// - Parameters:
-    ///   - networkService: 網路服務實例
+    /// - Parameter networkService: 網路服務實例
     init(networkService: NetworkServiceProtocol = NetworkService()) {
         self.networkService = networkService
     }
+}
 
-    // MARK: - Public Methods
-    
+// MARK: - NewsServiceProtocol
+
+extension NewsService: NewsServiceProtocol {
+
     /// 取得所有新聞資料
     ///
     /// - Returns: 新聞資料陣列
     /// - Throws: `NewsServiceError`
     func fetchNews() async throws(NewsServiceError) -> [NewsItem] {
-        let requestObject = NewsRequest.default
+        let requestObject = NewsRequestModel.default
         do {
-            let responseObject: NewsResponse = try await networkService.get(
+            let responseObject: NewsResponseModel = try await networkService.get(
                 stage: .default,
                 route: .fetchNews,
                 requestObject: requestObject
@@ -83,9 +85,9 @@ final class NewsService: NewsServiceProtocol {
         startDate: String?,
         endDate: String?
     ) async throws(NewsServiceError) -> [NewsItem] {
-        let requestObject = NewsRequest(keyword: keyword, startDate: startDate, endDate: endDate)
+        let requestObject = NewsRequestModel(keyword: keyword, startDate: startDate, endDate: endDate)
         do {
-            let responseObject: NewsResponse = try await networkService.post(
+            let responseObject: NewsResponseModel = try await networkService.post(
                 stage: .default,
                 route: .searchNews,
                 requestObject: requestObject

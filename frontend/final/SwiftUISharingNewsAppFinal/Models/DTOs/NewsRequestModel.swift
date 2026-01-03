@@ -1,5 +1,5 @@
 //
-//  NewsRequest.swift
+//  NewsRequestModel.swift
 //  SwiftUISharingNewsAppFinal
 //
 //  Created by Leo Ho on 2025/11/1.
@@ -8,7 +8,7 @@
 import Foundation
 
 /// 新聞請求
-struct NewsRequest: Codable {
+struct NewsRequestModel: Codable {
     
     /// 關鍵字
     let keyword: String?
@@ -26,20 +26,5 @@ struct NewsRequest: Codable {
     }
     
     /// 預設請求方式，即取得所有新聞資料
-    static let `default`: Self = NewsRequest(keyword: nil, startDate: nil, endDate: nil)
-}
-
-/// 新聞回應
-struct NewsResponse: Codable {
-    
-    /// 新聞項目列表
-    let newsItems: [NewsItem]
-    
-    /// 錯誤訊息 (如果有的話)
-    let errorMessage: String?
-    
-    enum CodingKeys: String, CodingKey {
-        case newsItems = "news_items"
-        case errorMessage = "error_message"
-    }
+    static let `default`: Self = NewsRequestModel(keyword: nil, startDate: nil, endDate: nil)
 }

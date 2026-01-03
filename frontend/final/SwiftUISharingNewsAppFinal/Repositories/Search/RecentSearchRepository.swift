@@ -48,10 +48,9 @@ final class RecentSearchRepository: RecentSearchRepositoryProtocol {
     /// SwiftData ModelContext
     private let modelContext: ModelContext
     
-    /// 初始化
+    /// 初始化 `RecentSearchRepository`
     ///
-    /// - Parameters:
-    ///   - modelContext: SwiftData ModelContext
+    /// - Parameter modelContext: SwiftData ModelContext
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
     }
@@ -109,8 +108,7 @@ final class RecentSearchRepository: RecentSearchRepositoryProtocol {
     
     /// 刪除單筆近期搜尋紀錄
     ///
-    /// - Parameters:
-    ///   - search: 要刪除的紀錄
+    /// - Parameter search: 要刪除的紀錄
     func deleteSearch(_ search: RecentSearch) throws {
         modelContext.delete(search)
         try modelContext.save()
@@ -118,8 +116,7 @@ final class RecentSearchRepository: RecentSearchRepositoryProtocol {
     
     /// 刪除多筆近期搜尋紀錄
     ///
-    /// - Parameters:
-    ///   - searches: 要刪除的紀錄陣列
+    /// - Parameter searches: 要刪除的紀錄陣列
     func deleteAllSearches(_ searches: [RecentSearch]) throws {
         searches.forEach { modelContext.delete($0) }
         try modelContext.save()

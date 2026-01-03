@@ -15,13 +15,14 @@ struct NewsDetailView: View {
     /// 新聞項目
     let newsItem: NewsItem
     
+    /// ViewModel
     private let viewModel = NewsDetailViewModel()
     
     /// 開啟 URL 環境物件
     @Environment(\.openURL) private var openURL
     
     /// 選擇的附加檔案
-    @State private var selectedAttachment: AttachmentFile?
+    @State private var selectedAttachment: NewsItem.AttachmentFile?
     
     // MARK: - View Body
     
@@ -114,7 +115,7 @@ private extension NewsDetailView {
     ///   - fileType: 檔案類型
     @ViewBuilder
     func previewFileButton(
-        _ file: AttachmentFile,
+        _ file: NewsItem.AttachmentFile,
         fileType: NewsDetailViewModel.SupportedFileType
     ) -> some View {
         Button {
@@ -135,10 +136,9 @@ private extension NewsDetailView {
     
     /// 預覽檔案 Sheet
     ///
-    /// - Parameters:
-    ///   - attachment: 附加檔案
+    /// - Parameter attachment: 附加檔案
     @ViewBuilder
-    func previewFileSheet(_ attachment: AttachmentFile) -> some View {
+    func previewFileSheet(_ attachment: NewsItem.AttachmentFile) -> some View {
         let result = viewModel.canPreviewFile(attachment.fileExtension)
         
         NavigationStack {
@@ -178,8 +178,7 @@ private extension NewsDetailView {
     
     /// 預覽圖片內容
     ///
-    /// - Parameters:
-    ///   - imageURL: 圖片連結
+    /// - Parameter imageURL: 圖片連結
     @ViewBuilder
     func previewImageContent(_ imageURL: URL) -> some View {
         AsyncImage(url: imageURL) { phase in

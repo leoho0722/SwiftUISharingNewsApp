@@ -26,7 +26,7 @@ enum NewsItemFactory {
         url: String = "https://example.com/news/1",
         publishDate: String = "2025-12-05",
         modifiedDate: String = "2025-12-05",
-        attachmentFiles: [AttachmentFile] = []
+        attachmentFiles: [NewsItem.AttachmentFile] = []
     ) -> NewsItem {
         NewsItem(
             title: title,

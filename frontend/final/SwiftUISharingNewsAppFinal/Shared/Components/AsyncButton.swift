@@ -42,7 +42,7 @@ struct AsyncButton<Label>: View where Label: View {
     }
 }
 
-// MARK: - Initializer
+// MARK: - Init
 
 // MARK: 預設初始化
 

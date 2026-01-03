@@ -41,7 +41,7 @@ struct LoadingView<Title, Icon>: View where Title: View, Icon: View {
     }
 }
 
-// MARK: - Initializer
+// MARK: - Init
 
 // MARK: 使用 String 進行初始化
 
@@ -69,7 +69,7 @@ extension LoadingView where Title == Text, Icon == Image {
     }
 }
 
-// MARK: - Previews
+// MARK: - Preview
 
 #Preview("使用 String init") {
     LoadingView("取得圖片中...")

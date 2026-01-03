@@ -6,8 +6,7 @@
 //
 
 import Foundation
-
-
+import Observation
 
 /// 新聞搜尋頁面 ViewModel
 @Observable
@@ -33,30 +32,75 @@ class SearchNewsViewModel {
     /// 資料庫 Repository
     private var repository: RecentSearchRepositoryProtocol?
     
-    // MARK: - Initializer
+    // MARK: - Init
     
-    /// 初始化
+    /// 初始化 `SearchNewsViewModel`
     ///
-    /// - Parameters:
-    ///   - newsService: 新聞服務實例
+    /// - Parameter newsService: 新聞服務實例
     init(newsService: NewsServiceProtocol = NewsService()) {
         self.newsService = newsService
     }
+}
+
+// MARK: - Nested Types
+
+extension SearchNewsViewModel {
     
-    // MARK: - Public Methods
+    /// 畫面狀態 enum
+    /// 
+    /// - idle：閒置 (預設值)
+    /// - loading：載入中
+    /// - loaded：載入完成
+    /// - error：發生錯誤
+    enum ViewState {
+        
+        /// 閒置 (預設值)
+        case idle
+        
+        /// 載入中
+        case loading
+        
+        /// 載入完成
+        case loaded
+        
+        /// 發生錯誤
+        ///
+        /// - Parameter error: 發生的錯誤
+        case error(Error)
+    }
     
+    /// 日期篩選條件的封裝模型
+    struct DateFilter: Equatable {
+        
+        /// 開始日期
+        var startDate: Date
+        
+        /// 結束日期
+        var endDate: Date
+        
+        /// 預設值 (最近一周)
+        static var defaultRange: DateFilter {
+            let now = Date()
+            let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: now) ?? now
+            return DateFilter(startDate: weekAgo, endDate: now)
+        }
+    }
+}
+
+// MARK: - Internal Method
+
+extension SearchNewsViewModel {
+
     /// 設定 Repository
     ///
-    /// - Parameters:
-    ///   - repository: RecentSearchRepositoryProtocol 實作
+    /// - Parameter repository: RecentSearchRepositoryProtocol 實作
     func configure(repository: RecentSearchRepositoryProtocol) {
         self.repository = repository
     }
     
     /// 執行搜尋請求並視需求儲存成近期搜尋紀錄
     ///
-    /// - Parameters:
-    ///   - saveToRecents: 是否需將此次搜尋條件寫入近期搜尋快取，預設值為 true
+    /// - Parameter saveToRecents: 是否需將此次搜尋條件寫入近期搜尋快取，預設值為 true
     @MainActor
     func performSearch(saveToRecents: Bool = true) async {
         let keyword = inputKeyword.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -89,8 +133,7 @@ class SearchNewsViewModel {
     
     /// 將選擇的近期搜尋套用到頁面狀態
     ///
-    /// - Parameters:
-    ///   - search: 選擇的近期搜尋紀錄
+    /// - Parameter search: 選擇的近期搜尋紀錄
     func applyRecentSearch(_ search: RecentSearch) {
         inputKeyword = search.keyword ?? ""
         
@@ -100,6 +143,13 @@ class SearchNewsViewModel {
         else {
             appliedDateFilter = nil
         }
+    }
+
+    /// 將編輯中的暫存日期恢復為目前已套用的狀態
+    /// 
+    /// - Returns: 已套用的日期篩選條件，若無則回傳預設值
+    func restoreDraftDateFilter() -> DateFilter {
+        return appliedDateFilter ?? .defaultRange
     }
     
     /// 清除目前的日期篩選設定
@@ -117,8 +167,7 @@ class SearchNewsViewModel {
     
     /// 刪除單筆近期搜尋
     ///
-    /// - Parameters:
-    ///   - search: 需要刪除的近期搜尋紀錄
+    /// - Parameter search: 需要刪除的近期搜尋紀錄
     @MainActor
     func removeRecentSearch(_ search: RecentSearch) {
         do {
@@ -130,8 +179,7 @@ class SearchNewsViewModel {
     
     /// 刪除所有近期搜尋
     ///
-    /// - Parameters:
-    ///   - searches: 需要刪除的近期搜尋紀錄
+    /// - Parameter searches: 需要刪除的近期搜尋紀錄
     @MainActor
     func removeAllRecentSearches(searches: [RecentSearch]) {
         do {
@@ -148,47 +196,6 @@ class SearchNewsViewModel {
             try await repository?.purgeExpiredSearches()
         } catch {
             viewState = .error(error)
-        }
-    }
-}
-
-// MARK: - Nested Types
-
-extension SearchNewsViewModel {
-    
-    /// 畫面狀態 enum
-    enum ViewState {
-        
-        /// 閒置 (預設值)
-        case idle
-        
-        /// 載入中
-        case loading
-        
-        /// 載入完成
-        case loaded
-        
-        /// 發生錯誤
-        ///
-        /// - Parameters:
-        ///   - error: 發生的錯誤
-        case error(Error)
-    }
-    
-    /// 日期篩選條件的封裝模型
-    struct DateFilter: Equatable {
-        
-        /// 開始日期
-        var startDate: Date
-        
-        /// 結束日期
-        var endDate: Date
-        
-        /// 預設值 (最近一周)
-        static var defaultRange: DateFilter {
-            let now = Date()
-            let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: now) ?? now
-            return DateFilter(startDate: weekAgo, endDate: now)
         }
     }
 }

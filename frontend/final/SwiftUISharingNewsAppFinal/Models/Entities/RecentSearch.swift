@@ -16,7 +16,7 @@ import SwiftData
 @Model
 final class RecentSearch {
 
-    /// 任意搜尋關鍵字（可為空，僅使用日期篩選時為 `nil`）。
+    /// 任意搜尋關鍵字 (可為空，僅使用日期篩選時為 `nil`)。
     var keyword: String?
 
     /// 篩選使用的開始日期。
@@ -28,7 +28,19 @@ final class RecentSearch {
     /// 建立時間，供一週自動過期判斷與排序使用。
     var createdAt: Date
 
-    init(keyword: String?, startDate: Date?, endDate: Date?, createdAt: Date = .now) {
+    /// 初始化 `RecentSearch`
+    ///
+    /// - Parameters:
+    ///   - keyword: 關鍵字
+    ///   - startDate: 開始日期
+    ///   - endDate: 結束日期
+    ///   - createdAt: 建立時間，預設為目前時間
+    init(
+        keyword: String?,
+        startDate: Date?,
+        endDate: Date?,
+        createdAt: Date = .now
+    ) {
         self.keyword = keyword
         self.startDate = startDate
         self.endDate = endDate
@@ -36,6 +48,11 @@ final class RecentSearch {
     }
 
     /// 更新既有紀錄並刷新建立時間，保持最近一次搜尋條件。
+    ///
+    /// - Parameters:
+    ///   - keyword: 關鍵字
+    ///   - startDate: 開始日期
+    ///   - endDate: 結束日期
     func update(keyword: String?, startDate: Date?, endDate: Date?) {
         self.keyword = keyword
         self.startDate = startDate

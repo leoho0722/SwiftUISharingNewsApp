@@ -22,28 +22,13 @@ class NewsListViewModel {
     /// 新聞服務實例，透過依賴注入 (DI) 提供
     private let newsService: NewsServiceProtocol
     
-    // MARK: - Initializer
+    // MARK: - Init
     
-    /// 初始化
+    /// 初始化 `NewsListViewModel`
     ///
-    /// - Parameters:
-    ///   - newsService: 新聞服務實例
+    /// - Parameter newsService: 新聞服務實例
     init(newsService: NewsServiceProtocol = NewsService()) {
         self.newsService = newsService
-    }
-    
-    // MARK: - Public Methods
-    
-    /// 抓取所有新聞資料
-    func fetchNews() async {
-        viewState = .loading
-        do {
-            let fetchedNews = try await newsService.fetchNews()
-            newsItems = fetchedNews
-            viewState = .loaded
-        } catch {
-            viewState = .error(error)
-        }
     }
 }
 
@@ -52,6 +37,11 @@ class NewsListViewModel {
 extension NewsListViewModel {
     
     /// 畫面狀態 enum
+    /// 
+    /// - idle：閒置 (預設值)
+    /// - loading：載入中
+    /// - loaded：載入完成
+    /// - error：發生失敗
     enum ViewState {
         
         /// 閒置 (預設值)
@@ -65,9 +55,25 @@ extension NewsListViewModel {
         
         /// 發生失敗
         ///
-        /// - Parameters:
-        ///   - error: 發生失敗的錯誤
+        /// - Parameter error: 發生失敗的錯誤
         case error(Error)
+    }
+}
+
+// MARK: Internal Method
+
+extension NewsListViewModel {
+    
+    /// 抓取所有新聞資料
+    func fetchNews() async {
+        viewState = .loading
+        do {
+            let fetchedNews = try await newsService.fetchNews()
+            newsItems = fetchedNews
+            viewState = .loaded
+        } catch {
+            viewState = .error(error)
+        }
     }
 }
 
