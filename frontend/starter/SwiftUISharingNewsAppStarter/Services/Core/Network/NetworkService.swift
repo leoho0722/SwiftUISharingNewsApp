@@ -5,42 +5,11 @@
 //  Created by Leo Ho on 2025/11/1.
 //
 
+import Combine
 import Foundation
 
-/// 定義網路服務的 Protocol
-protocol NetworkServiceProtocol {
-    
-    /// 發送 GET 請求
-    ///
-    /// - Parameters:
-    ///   - stage: API 部署環境
-    ///   - route: API 路由
-    ///   - requestObject: API 請求 body 物件
-    /// - Returns: 伺服器回傳的資料
-    /// - Throws: `NetworkServiceError`
-    func get<E, D>(
-        stage: NetworkConstants.APIStage,
-        route: NetworkConstants.Routes,
-        requestObject: E
-    ) async throws(NetworkServiceError) -> D where E: Encodable, D: Decodable
-    
-    /// 發送 POST 請求
-    ///
-    /// - Parameters:
-    ///   - stage: API 部署環境
-    ///   - route: API 路由
-    ///   - requestObject: API 請求 body 物件
-    /// - Returns: 伺服器回傳的資料
-    /// - Throws: `NetworkServiceError`
-    func post<E, D>(
-        stage: NetworkConstants.APIStage,
-        route: NetworkConstants.Routes,
-        requestObject: E
-    ) async throws(NetworkServiceError) -> D where E: Encodable, D: Decodable
-}
-
 /// 網路服務實作類別
-final class NetworkService: NetworkServiceProtocol {
+final class NetworkService {
     
     // MARK: - Properties
     
@@ -57,31 +26,280 @@ final class NetworkService: NetworkServiceProtocol {
     }
 }
 
-// MARK: - Internal Method
+// MARK: - Completion Handler Protocol Implementation
 
-extension NetworkService {
-
+extension NetworkService: NetworkServiceCompletionHandlerProtocol {
+    
     /// 發送 GET 請求
     ///
     /// - Parameters:
-    ///   - stage: API 部署環境
-    ///   - route: API 路由
-    ///   - requestObject: API 請求 body 物件
-    /// - Returns: 伺服器回傳的資料
-    /// - Throws: `NetworkServiceError`
-    func get<E, D>(
-        stage: NetworkConstants.APIStage,
-        route: NetworkConstants.Routes,
-        requestObject: E
-    ) async throws(NetworkServiceError) -> D where E: Encodable, D: Decodable {
-        do {
-            let request = try buildURLRequest(
-                with: .get,
-                stage: stage,
-                route: route,
-                body: requestObject
-            )
+    ///   - request: URLRequest 物件
+    ///   - success: 請求成功時的要做的事
+    ///   - failure: 請求失敗時的要做的事
+    func get<D>(
+        request: URLRequest,
+        success: @escaping (D) -> Void,
+        failure: @escaping (NetworkServiceError) -> Void
+    ) where D: Decodable {
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
+            guard let self else { 
+                return
+            }
             
+            if let error {
+                failure(NetworkServiceError.unknownError(error: error))
+                return
+            }
+            
+            do {
+                guard let response else {
+                    failure(NetworkServiceError.invalidResponse)
+                    return
+                }
+                try validateResponse(response)
+                
+                guard let data else {
+                    failure(NetworkServiceError.emptyResponseData)
+                    return
+                }
+                let decodedData: D = try decodeResponseData(with: data)
+                success(decodedData)
+            } catch let error as DecodingError {
+                failure(NetworkServiceError.decodingFailed(decodingError: error))
+            } catch let error as NetworkServiceError {
+                failure(error)
+            } catch {
+                failure(NetworkServiceError.unknownError(error: error))
+            }
+        }.resume()
+    }
+    
+    /// 發送 POST 請求
+    ///
+    /// - Parameters:
+    ///   - request: URLRequest 物件
+    ///   - success: 請求成功時的要做的事
+    ///   - failure: 請求失敗時的要做的事
+    func post<D>(
+        request: URLRequest,
+        success: @escaping (D) -> Void,
+        failure: @escaping (NetworkServiceError) -> Void
+    ) where D: Decodable {
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
+            guard let self else { 
+                return
+            }
+            
+            if let error = error {
+                failure(NetworkServiceError.unknownError(error: error))
+                return
+            }
+            
+            do {
+                guard let response = response else {
+                    failure(NetworkServiceError.invalidResponse)
+                    return
+                }
+                try validateResponse(response)
+                
+                guard let data = data else {
+                    failure(NetworkServiceError.emptyResponseData)
+                    return
+                }
+                let decodedData: D = try decodeResponseData(with: data)
+                success(decodedData)
+            } catch let error as DecodingError {
+                failure(NetworkServiceError.decodingFailed(decodingError: error))
+            } catch let error as NetworkServiceError {
+                failure(error)
+            } catch {
+                failure(NetworkServiceError.unknownError(error: error))
+            }
+        }.resume()
+    }
+}
+
+// MARK: - Result Protocol Implementation
+
+extension NetworkService: NetworkServiceResultProtocol {
+    
+    /// 發送 GET 請求
+    ///
+    /// - Parameters:
+    ///   - request: URLRequest 物件
+    ///   - completion: 請求完成時的要做的事
+    func get<D>(
+        request: URLRequest,
+        completion: @escaping (Result<D, NetworkServiceError>) -> Void
+    ) where D: Decodable {
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
+            guard let self else { 
+                return
+            }
+            
+            if let error = error {
+                completion(.failure(NetworkServiceError.unknownError(error: error)))
+                return
+            }
+            
+            do {
+                guard let response = response else {
+                    completion(.failure(NetworkServiceError.invalidResponse))
+                    return
+                }
+                try validateResponse(response)
+                
+                guard let data = data else {
+                    completion(.failure(NetworkServiceError.emptyResponseData))
+                    return
+                }
+                let decodedData: D = try decodeResponseData(with: data)
+                completion(.success(decodedData))
+            } catch let error as DecodingError {
+                completion(.failure(NetworkServiceError.decodingFailed(decodingError: error)))
+            } catch let error as NetworkServiceError {
+                completion(.failure(error))
+            } catch {
+                completion(.failure(NetworkServiceError.unknownError(error: error)))
+            }
+        }.resume()
+    }
+    
+    /// 發送 POST 請求
+    ///
+    /// - Parameters:
+    ///   - request: URLRequest 物件
+    ///   - completion: 請求完成時的要做的事
+    func post<D>(
+        request: URLRequest,
+        completion: @escaping (Result<D, NetworkServiceError>) -> Void
+    ) where D: Decodable {
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
+            guard let self else { 
+                return
+            }
+            
+            if let error = error {
+                completion(.failure(NetworkServiceError.unknownError(error: error)))
+                return
+            }
+            
+            do {
+                guard let response = response else {
+                    completion(.failure(NetworkServiceError.invalidResponse))
+                    return
+                }
+                try validateResponse(response)
+                
+                guard let data = data else {
+                    completion(.failure(NetworkServiceError.emptyResponseData))
+                    return
+                }
+                let decodedData: D = try decodeResponseData(with: data)
+                completion(.success(decodedData))
+            } catch let error as DecodingError {
+                completion(.failure(NetworkServiceError.decodingFailed(decodingError: error)))
+            } catch let error as NetworkServiceError {
+                completion(.failure(error))
+            } catch {
+                completion(.failure(NetworkServiceError.unknownError(error: error)))
+            }
+        }.resume()
+    }
+}
+
+// MARK: - Combine Protocol Implementation
+
+extension NetworkService: NetworkServiceCombineProtocol {
+    
+    /// 發送 GET 請求
+    ///
+    /// - Parameter request: URLRequest 物件
+    /// - Returns: AnyPublisher 物件
+    func get<D>(
+        request: URLRequest
+    ) -> AnyPublisher<D, NetworkServiceError> where D: Decodable {
+        urlSession.dataTaskPublisher(for: request)
+            .tryMap { [weak self] data, response in
+                guard let self else {
+                    throw NetworkServiceError.unknownError(error: NSError(domain: "NetworkService", code: -1))
+                }
+                try validateResponse(response)
+                return data
+            }
+            .tryMap { [weak self] data in
+                guard let self else {
+                    throw NetworkServiceError.unknownError(error: NSError(domain: "NetworkService", code: -1))
+                }
+                let decodedData: D = try decodeResponseData(with: data)
+                return decodedData
+            }
+            .mapError { error in
+                if let networkError = error as? NetworkServiceError {
+                    return networkError
+                }
+                else if let decodingError = error as? DecodingError {
+                    return NetworkServiceError.decodingFailed(decodingError: decodingError)
+                }
+                else {
+                    return NetworkServiceError.unknownError(error: error)
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+    
+    /// 發送 POST 請求
+    ///
+    /// - Parameter request: URLRequest 物件
+    /// - Returns: AnyPublisher 物件
+    func post<D>(
+        request: URLRequest
+    ) -> AnyPublisher<D, NetworkServiceError> where D: Decodable {
+        urlSession.dataTaskPublisher(for: request)
+            .tryMap { [weak self] data, response in
+                guard let self else {
+                    throw NetworkServiceError.unknownError(error: NSError(domain: "NetworkService", code: -1))
+                }
+                try validateResponse(response)
+                return data
+            }
+            .tryMap { [weak self] data in
+                guard let self else {
+                    throw NetworkServiceError.unknownError(error: NSError(domain: "NetworkService", code: -1))
+                }
+                let decodedData: D = try decodeResponseData(with: data)
+                return decodedData
+            }
+            .mapError { error in
+                if let networkError = error as? NetworkServiceError {
+                    return networkError
+                }
+                else if let decodingError = error as? DecodingError {
+                    return NetworkServiceError.decodingFailed(decodingError: decodingError)
+                }
+                else {
+                    return NetworkServiceError.unknownError(error: error)
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+}
+
+// MARK: - Swift Concurrency Protocol Implementation
+
+extension NetworkService: NetworkServiceSwiftConcurrencyProtocol {
+    
+    /// 發送 GET 請求
+    ///
+    /// 使用已建立的 `URLRequest` 物件發送 GET 請求。
+    ///
+    /// - Parameter request: URLRequest 物件
+    /// - Returns: Decodable 物件
+    /// - Throws: NetworkServiceError
+    func get<D>(
+        request: URLRequest
+    ) async throws(NetworkServiceError) -> D where D: Decodable {
+        do {
             let (data, response) = try await urlSession.data(for: request)
             try validateResponse(response)
             let decodedData: D = try decodeResponseData(with: data)
@@ -97,31 +315,19 @@ extension NetworkService {
     
     /// 發送 POST 請求
     ///
-    /// - Parameters:
-    ///   - stage: API 部署環境
-    ///   - route: API 路由
-    ///   - requestObject: API 請求 body 物件
-    /// - Returns: 伺服器回傳的資料
-    /// - Throws: `NetworkServiceError`
-    func post<E, D>(
-        stage: NetworkConstants.APIStage,
-        route: NetworkConstants.Routes,
-        requestObject: E
-    ) async throws(NetworkServiceError) -> D where E: Encodable, D: Decodable {
+    /// 使用已建立的 `URLRequest` 物件發送 POST 請求。
+    ///
+    /// - Parameter request: URLRequest 物件
+    /// - Returns: Decodable 物件
+    /// - Throws: NetworkServiceError
+    func post<D>(
+        request: URLRequest
+    ) async throws(NetworkServiceError) -> D where D: Decodable {
         do {
-            let request = try buildURLRequest(
-                with: .post,
-                stage: stage,
-                route: route,
-                body: requestObject
-            )
-            
             let (data, response) = try await urlSession.data(for: request)
             try validateResponse(response)
             let decodedData: D = try decodeResponseData(with: data)
             return decodedData
-        } catch let error as EncodingError {
-            throw NetworkServiceError.encodingFailed(encodingError: error)
         } catch let error as DecodingError {
             throw NetworkServiceError.decodingFailed(decodingError: error)
         } catch let error as NetworkServiceError {
@@ -135,44 +341,6 @@ extension NetworkService {
 // MARK: - Private Method
 
 private extension NetworkService {
-    
-    /// 建立 URLRequest
-    ///
-    /// - Parameters:
-    ///   - method: HTTP 方法
-    ///   - stage: API 部署環境
-    ///   - route: API 路由
-    ///   - body: 請求的主體資料
-    /// - Returns: 建立好的 URLRequest
-    func buildURLRequest<E>(
-        with method: NetworkConstants.HTTPMethod,
-        stage: NetworkConstants.APIStage,
-        route: NetworkConstants.Routes,
-        body: E
-    ) throws(NetworkServiceError) -> URLRequest where E: Encodable {
-        let baseURL = NetworkConstants.baseURL
-        guard let url = URL(string: "\(baseURL)\(stage.rawValue)\(route.endpoint)") else {
-            throw NetworkServiceError.invalidURL
-        }
-        var request = URLRequest(url: url)
-        request.httpMethod = method.rawValue
-        request.allHTTPHeaderFields = [
-            NetworkConstants.HTTPHeaderField.contentType.rawValue : NetworkConstants.ContentType.json.rawValue
-        ]
-        
-        switch method {
-        case .post:
-            do {
-                request.httpBody = try JSONEncoder().encode(body)
-            } catch {
-                throw NetworkServiceError.encodingFailed(encodingError: error as! EncodingError)
-            }
-        case .get:
-            break
-        }
-        
-        return request
-    }
     
     /// 驗證 HTTP Response
     ///
