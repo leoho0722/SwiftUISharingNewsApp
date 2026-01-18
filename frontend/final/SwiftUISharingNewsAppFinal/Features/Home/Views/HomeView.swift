@@ -28,15 +28,17 @@ struct HomeView: View {
             }
         }
         else {
-            NewsListView()
-                .tabItem {
-                    Label("新聞列表", symbols: .newspaperFill)
-                }
-            
-            SearchNewsView()
-                .tabItem {
-                    Label("新聞搜尋", symbols: .magnifyingglass)
-                }
+            TabView {
+                NewsListView()
+                    .tabItem {
+                        Label("新聞列表", symbols: .newspaperFill)
+                    }
+                
+                SearchNewsView()
+                    .tabItem {
+                        Label("新聞搜尋", symbols: .magnifyingglass)
+                    }
+            }
         }
     }
 }
