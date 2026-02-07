@@ -72,6 +72,9 @@ extension NewsListView {
                 }
             }
         }
+        .refreshable {
+            await viewModel.fetchNews()
+        }
     }
     
     /// 錯誤畫面
